@@ -360,7 +360,7 @@ window.onload = function() {
 	              '<button id="exit-mode" class="alipi" onclick="a11ypi.exitMode();" title="Do not want to save any changes, just take me out of this editing"> '+
 	              'Exit</button>'+
                 '<button id="help-window" class="alipi" onclick="a11ypi.help_window();" title="How may I help you in editing this page?">Help</button>'+
-                '<button id="undo-button" class="alipi" onclick="util.undoChanges();"title="Undo previous change, one by one">Undo changes</button>'+
+                '<button id="undo-button" class="alipi" onclick="a11ypi.util.undoChanges();"title="Undo previous change, one by one">Undo changes</button>'+
                 '<button id="publish-button" class="alipi" onclick="a11ypi.loginToSwtStore();"title="Publish your changes to blog">Publish</button></div>';
 
               var element_edit_overlay_template = '<div id="element_edit_overlay" class="alipi ui-widget-header ui-corner-all" >'+
@@ -589,7 +589,7 @@ window.onload = function() {
               $('#login-template').dialog({
                 height: "23em",
                 left: "20.2em",
-                top: "3em",
+                //top: "3em",
                 width: "30em",
                 position: 'center',
                 modal: true,
@@ -984,7 +984,7 @@ window.onload = function() {
 	              position: 'center',
 	              width:'70em',
 	              height:'30em',
-                top: '33em',
+                //top: '33em',
 	              modal: true,
 	              buttons: {
 				          "+": function() {
@@ -1400,7 +1400,7 @@ window.onload = function() {
           },
         };
 
-        var util = {
+        var util = a11ypi.util = {
           history: [],
           command: [],
 
