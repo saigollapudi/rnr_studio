@@ -1,3 +1,7 @@
+/* jquery dialog to have high z-index*/
+.ui-dialog {
+  z-index: 1000;
+}
 @media screen and (min-width:1000px) {
 
 #renarrated_overlay { position:fixed; left:0.5%; width:99%; text-align:center; font-weight:normal; z-index:2147483645; display:block; }
@@ -42,7 +46,7 @@
 #close-element { position:absolute; top:-5px; left:-2px; width:10px; font-size:17px; font-weight:400; font-style:italic; text-align:justify; }
 #cant-edit     { width: 450px; margin:15px;  font-size:17px; font-weight:400; font-style:italic; text-align:justify; display:none; }
 
-#editoroverlay   { min-width:90%; text-align:justify; display: none; }
+#editoroverlay   { min-width:90%; text-align:justify; display: none; min-height: 300px; }
 #editoroverlay a { color:#1C94C4; }
 
 #adv-reference { position: absolute; top:15%; left:2%; min-width:48%; max-width:48%; border:solid 3px; padding:10px; font-size:16px;

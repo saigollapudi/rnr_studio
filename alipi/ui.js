@@ -647,7 +647,7 @@ window.onload = function() {
                 close: function() {
                   console.log('close');
                 }
-              });
+              }).css('minHeight', 300);
             },
 
             publish: function() {
@@ -667,13 +667,13 @@ window.onload = function() {
 					          '<label id="tar-lab3" class="alipi" >Language of re-narration: </label> '+
 					          '<input id="lang-select" class="alipi" placeholder="Type language name"/>'+
   		              '<img id="lang-img" src="http://dev.a11y.in/wsgi/images/db_loading.gif"/> '+
-					          '<label id="tar-lab4" class="alipi" >Select a style of re-narration: </label> '+
+					          '<label id="tar-lab4" class="alipi" for="style-select">Select a style of re-narration: </label> '+
 					          '<select id="style-select" class="alipi" > '+
 					          '<option>Translation</option><option>Technical</option><option>Fun</option><option>Simplification</option> '+
 					          '<option>Correction</option><option>Evolution</option><option>Other</option></select>'+
-                    '<div id="free-form"><label id="tar-lab8" class="alipi">Comments:</label><textarea id="tar-comment"></textarea></div>'+
+                    '<div id="free-form"><label id="tar-lab8" for="tar-comment" class="alipi">Comments:</label><textarea id="tar-comment"></textarea></div>'+
 					          '<div id="blogset" > We are having issues with posting to a personal Google blog.  Please use demo.swtr.us to publish.</div> '+
-					          '<p id="tar-p" ><input id="our-check" class="alipi" type="radio"name="blog" /> '+
+					          '<p id="tar-p" ><input id="our-check" class="alipi" type="radio"name="blog" checked="checked" /> '+
 					          '<label id="tar-lab6" class="alipi" > demo.swtr.us </label><input id="your-check" class="alipi" type="radio" name="blog" /> '+
 					          '<label id="tar-lab7" class="alipi">Personal Blog</label></p></div>';
 
@@ -1029,7 +1029,7 @@ window.onload = function() {
 				          pageEditor.cleanUp(pageEditor.event.target);
 				          $("#editoroverlay" ).remove();
 	              }
-		          });
+		          }).css('minHeight', 300);
 
 		          $($($('<label>').insertAfter($('.ui-dialog-buttonset').children()[0])).html('Magnify or Demagnify')); // Element added externally with css
 		          $($('.ui-dialog-buttonset').children()[1]).attr('id','mag-demag');
