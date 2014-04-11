@@ -1295,9 +1295,9 @@ window.onload = function() {
 
           addAudio: function(){
 		        url = $('#audioInput').val();
-		        if(url.substr(-4) =='.ogg'){
-	            manager.recordAudio(pageEditor.event.target);
-		        }
+		        // if(url.substr(-4) =='.ogg'){
+	          manager.recordAudio(pageEditor.event.target);
+		        //}
 		        // else{
 		        //     $('#dialog-message').html('<p>Please enter a valid url</p>');
 		        //     $('#dialog-message').dialog({

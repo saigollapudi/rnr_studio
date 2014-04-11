@@ -452,12 +452,13 @@ def sweet(data):
             sweetmaker.sweet(conf.SWEET_STORE_ADD[0],
                              [{"what": i['type'],
                                "who": i['author'],
-                               "where":i['about']+i['xpath'],
+                               "where":i['about'],
                                "how":{'blogUrl': '{0}/#{1}'.format(
                                    conf.CUSTOM_BLOG_URL[0],
                                    g.response_from_blogger.json()['name']),
                                 'language': i['lang'],
-                                'location': i['location']}}])
+                                'location': i['location'],
+                                'xpath': i['xpath']}}])
     return True
         # data = json.dumps(data)
     # req = requests.api.post(conf.SWEETURL[0]+"/add",{'data':data})
