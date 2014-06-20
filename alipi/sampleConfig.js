@@ -5,9 +5,16 @@
  * config['sweet'] = "URL for the sweet store, same as SWEETURL from conf.py"
  */
 var config = {
-    'hostname': "y.a11y.in",
-    'deploy': "http://y.a11y.in/web",
-		'root': "http://y.a11y.in",
-		'sweet': "http://demo.swtr.us"
-}
-
+  'hostname': "127.0.0.1",
+  'deploy': "http://localhost:5000",
+  'root': "http://localhost",
+	'sweet': "http://localhost:5001",
+  'app_id': 'your app id from sweet store',
+  'app_secret': 'your app secret from sweet store',
+  "endpoints": { "get": "/api/sweets/q",
+                "post": "/api/sweets",
+                "auth": "/oauth/authorize",
+                "login": "/auth/login",
+                "logout": "/auth/logout"
+              },
+  'oauth_redirect_uri': 'http://localhost:5000/redirect'
