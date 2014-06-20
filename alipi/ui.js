@@ -24,11 +24,17 @@ window.onload = function() {
             pageHtml:'',
             d: {},
             responseJSON:'',
-            testContext : function()
-            {
+            oauth: new Oauth({
+                app_id: config.app_id,
+                app_secret: config.app_secret,
+                endpoint: config.sweet + config.endpoints.auth,
+                redirect_uri: config.oauth_redirect_uri,
+                scopes: 'email,sweet'
+            }),
+            testContext : function() {
 		          if(document.getElementById('social_overlay') != null)
 	              document.body.removeChild(document.getElementById('social_overlay'));
- 		          $(document).ready(function(){
+ 		          $(document).ready(function() {
                 try{
                   $('body *').not('iframe').contents().filter(function(){
 		                try{
@@ -76,7 +82,14 @@ window.onload = function() {
 	              }
 		          }
             },
-
+            login: function() {
+              // $.post(config.deploy+'/saveSession',
+              //        {url: window.location.href},
+              //        function(data) {
+              window.localStorage.setItem("lastUrl", window.location.href);
+              a11ypi.oauth.authorize();
+                     // });
+            },
             ajax: function() {
 		          if(a11ypi.flag == '0')
 		          {
@@ -342,11 +355,12 @@ window.onload = function() {
 	              '<button id="outter-up-button" class="alipi" onclick="a11ypi.outterToggle();" title="Move this bar to bottom">Move</button> '+
 	              '<button id="edit-current" class="alipi" title="Allow to edit this page">Re-narrate</button> '+
 	              '<button id="see-narration" class="alipi" title="See other renarrations, which are in same or other languages"> '+
-	              'Re-narrations</button>'+
+	                  'Re-narrations</button>'+
 	              // '<button id="see-comment" class="alipi" onclick="a11ypi.showComment();" title="5el"> '+
 	              // '5el</button>'+
                 '<button id="see-links" class="alipi"  title="See other re-narrated pages of this domain">Re-narrated Pages '+
-	              '</button>'+
+	                  '</button>'+
+                    '<button id="login" class="alipi" onclick="a11ypi.login();" title="Login to SWeeT store">Login</button>'+
                 // '<select id="blog-filter" class="alipi" onChange="a11ypi.checkSelect();" title="Select one of the blog name"></select>'+
                 '<button id="go" class="alipi ui-icon-circle-arrow-e" onclick="a11ypi.go();" title="Filter by blog" >|Y|</button>'+
                 '<div id="show-box" title="Choose a narration"></div> '+
@@ -412,6 +426,10 @@ window.onload = function() {
 
               $("#edit-current").button();
               $("#see-narration").button();
+              $("#login").button();
+              if(document.cookie.contains("username")) {
+                $("#login").hide();
+              }
               $("#see-links").button();
 
 //              $('input[class="alipi"], select[class="alipi"]').button();
@@ -537,7 +555,7 @@ window.onload = function() {
                     add(suggestions);
                   });
 				          $('#loc-img').show();
-                },
+                }
               });
             },
 
@@ -561,93 +579,93 @@ window.onload = function() {
                     add(suggestions);
                   });
 				          $('#lang-img').show();
-                },
+                }
               });
 
 
             },
 
             loginToSwtStore: function() {
-              var login_template = '<div id="login-template" style="display: none; height:15em;" title="Please login" class="alipi ui-widget-header ui-corner-all">' +
-                    '<div>' +
-                    '<h3> Registered Users:</h3>' +
-                    '<div style="text-align: left;">Please enter your username and password </div>' +
-			              '<input id="tar-uname" type="text" placeholder=" username" size="30">'+
-			          '<input id="tar-pass" class="" type="password" placeholder=" password" size="30">'+
-                '<h3 class="">Guest Users:</h3>' +
-                '<div>Please enter your name </div>' +
-			          '<input id="tar-name" class="" type="text" placeholder=" Your name" /> '+
-                '</div>' +
-                '</div>';
+              // var login_template = '<div id="login-template" style="display: none; height:15em;" title="Please login" class="alipi ui-widget-header ui-corner-all">' +
+              //       '<div>' +
+              //       '<h3> Registered Users:</h3>' +
+              //       '<div style="text-align: left;">Please enter your username and password </div>' +
+			        //       '<input id="tar-uname" type="text" placeholder=" username" size="30">'+
+			        //   '<input id="tar-pass" class="" type="password" placeholder=" password" size="30">'+
+              //   '<h3 class="">Guest Users:</h3>' +
+              //   '<div>Please enter your name </div>' +
+			        //   '<input id="tar-name" class="" type="text" placeholder=" Your name" /> '+
+              //   '</div>' +
+              //   '</div>';
 
-              if($('#login-template').length == 0) {
-                $('body').append(login_template);
-              }
-	            $(document).unbind('mouseover'); // Unbind the css on mouseover
-	            $(document).unbind('mouseout'); // Unbind the css on mouseout
+              // if($('#login-template').length == 0) {
+              //   $('body').append(login_template);
+              // }
+	            // $(document).unbind('mouseover'); // Unbind the css on mouseover
+	            // $(document).unbind('mouseout'); // Unbind the css on mouseout
 
-              $('#login-template').dialog({
-                height: "23em",
-                left: "20.2em",
-                //top: "3em",
-                width: "30em",
-                position: 'center',
-                modal: true,
-                buttons: [
-                  {
-                    text: 'Login',
-                    click: function() {
+              // $('#login-template').dialog({
+              //   height: "23em",
+              //   left: "20.2em",
+              //   //top: "3em",
+              //   width: "30em",
+              //   position: 'center',
+              //   modal: true,
+              //   buttons: [
+              //     {
+              //       text: 'Login',
+              //       click: function() {
 
-                      console.log('login');
-                      var uname = $('#tar-uname').val();
-                      var pass = $('#tar-pass').val();
-                      if(uname && pass) {
-                        $('.login-button > .ui-button-text').text('Please wait..');
-                        $.ajax({
-                          crossDomain: true,
-                          type: "POST",
-                          url: config.sweet+"/authenticate",
-                          data: {"user":uname, "hash":pass},
-                          error: function(e, a, b){
-                            console.log(e,a,b);
+              //         console.log('login');
+              //         var uname = $('#tar-uname').val();
+              //         var pass = $('#tar-pass').val();
+              //         if(uname && pass) {
+              //           $('.login-button > .ui-button-text').text('Please wait..');
+              //           $.ajax({
+              //             crossDomain: true,
+              //             type: "POST",
+              //             url: config.sweet+"/authenticate",
+              //             data: {"user":uname, "hash":pass},
+              //             error: function(e, a, b){
+              //               console.log(e,a,b);
 
-                          }
-                        }).done(function(data){
-                          $('.login-button > .ui-button-text').text('Login');
+              //             }
+              //           }).done(function(data){
+              //             $('.login-button > .ui-button-text').text('Login');
                           a11ypi.publish();
-                          });
+              //             });
 
-                      }
-                      else {
-                        //console.log('no username and password');
-                        //$('#login-error').show();
-                        //TODO: have a proper UI
-                        alert('No username or password provided! Please enter both and then click Login');
-                      }
-                    },
-                    'class': 'login-button'
-                  },
-                  {
-                    text: 'Guest Login',
-                    click: function() {
-                      console.log('guest login');
-                      var name = $('#tar-name').val();
-                      if(name) {
-                        $(this).dialog('close');
-                        a11ypi.publish();
-                      }
-                      else {
-                        //console.log('no guest name');
-                        //$('#guest-error').show();
-                        alert('Please provide a name for Guest Login');
-                      }
-                    }
-                  }
-                ],
-                close: function() {
-                  console.log('close');
-                }
-              }).css('minHeight', 300);
+              //         }
+              //         else {
+              //           //console.log('no username and password');
+              //           //$('#login-error').show();
+              //           //TODO: have a proper UI
+              //           alert('No username or password provided! Please enter both and then click Login');
+              //         }
+              //       },
+              //       'class': 'login-button'
+              //     },
+              //     {
+              //       text: 'Guest Login',
+              //       click: function() {
+              //         console.log('guest login');
+              //         var name = $('#tar-name').val();
+              //         if(name) {
+              //           $(this).dialog('close');
+//                        a11ypi.publish();
+              //         }
+              //         else {
+              //           //console.log('no guest name');
+              //           //$('#guest-error').show();
+              //           alert('Please provide a name for Guest Login');
+              //         }
+              //       }
+              //     }
+              //   ],
+              //   close: function() {
+              //     console.log('close');
+              //   }
+              // }).css('minHeight', 300);
             },
 
             publish: function() {

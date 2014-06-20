@@ -2,6 +2,7 @@ from flask import Flask
 from flask import request
 from flask import render_template
 from flask import make_response
+from flask import session
 import lxml.html
 import pymongo
 from bson import Code
@@ -19,6 +20,7 @@ import json
 
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = conf.SECRET_KEY[0]
 
 
 @app.before_request
@@ -83,9 +85,7 @@ def start_page():
                             i[0].attrib['href'].encode('utf-8')))
         setScripts()
         g.root.body.set("onload", "a11ypi.loadOverlay();")
-        response = make_response()
-        response.data = lxml.html.tostring(g.root)
-        return response
+
 
     elif request.args.has_key('lang') == True and request.args.has_key('interactive') == True and request.args.has_key('blog') == False:
         setScripts()
@@ -108,9 +108,6 @@ def start_page():
         script_test.set("src", conf.APPURL[0] + "/alipi/ui.js")
         script_test.set("type", "text/javascript")
         g.root.body.set("onload", "a11ypi.ren()")
-        response = make_response()
-        response.data = lxml.html.tostring(g.root)
-        return response
 
     elif request.args.has_key('interactive') == True and request.args.has_key('blog') == True and request.args.has_key('lang') == True:
         setScripts()
@@ -118,28 +115,33 @@ def start_page():
         g.root.body.set("onload", "a11ypi.filter(); a11ypi.tweet();" +
                         "a11ypi.facebook(); a11ypi.loadOverlay();")
         g.root.make_links_absolute(d['foruri'], resolve_base_href=True)
-        response = make_response()
-        response.data = lxml.html.tostring(g.root)
-        return response
 
     elif request.args.has_key('interactive') == False and request.args.has_key('blog') == True:
         setScripts()
         g.root.make_links_absolute(d['foruri'], resolve_base_href=True)
         g.root.body.set('onload', 'a11ypi.loadOverlay();')
-        response = make_response()
-        response.data = lxml.html.tostring(g.root)
-        return response
+
+    response = make_response()
+    response.data = lxml.html.tostring(g.root)
+    if 'username' in session:
+        response.set_cookie('username', session['username'])
+    return response
 
 
 def setScripts():
     script_test = g.root.makeelement('script')
     script_auth = g.root.makeelement('script')
+    # script_oauth = g.root.makeelement('script')
 
     g.root.body.append(script_auth)
+    # g.root.body.append(script_oauth)
     g.root.body.append(script_test)
 
     script_test.set("src", conf.APPURL[0] + "/alipi/pack.min.js")
     script_test.set("type", "text/javascript")
+
+    script_auth.set("src", conf.APPURL[0] + "/alipi/oauth.js")
+    script_auth.set("type", "text/javascript")
 
     style = g.root.makeelement('link')
     g.root.body.append(style)
@@ -214,6 +216,43 @@ def setSocialScript():
     style.set("rel", "stylesheet")
     style.set("type", "text/css")
     style.set("href", "http://y.a11y.in/alipi/stylesheet.css")
+
+
+@app.route('/redirect')
+def redirect_uri():
+    auth_tok = None
+    if request.args.get('code'):
+        payload = {
+            'scopes': 'email sweet',
+            'client_secret': conf.APP_SECRET,
+            'code': request.args.get('code'),
+            'redirect_uri': conf.REDIRECT_URI,
+            'grant_type': 'authorization_code',
+            'client_id': conf.APP_ID
+        }
+        # token exchange endpoint
+        oauth_token_x_endpoint = conf.SWEETURL[0] + '/oauth/token'
+        resp = requests.post(oauth_token_x_endpoint, data=payload)
+        auth_tok = json.loads(resp.text)
+        print auth_tok
+
+        if 'error' in auth_tok:
+            print auth_tok['error']
+            return make_response(auth_tok['error'], 200)
+
+        session['auth_tok'] = auth_tok
+
+        username_request = requests.get(conf.SWEETURL[0] +
+                                        '/api/users/me?access_token=' +
+                                        session['auth_tok']['access_token'])
+        session['username'] = username_request.json()['username']
+    if 'auth_tok' in session:
+        auth_tok = session['auth_tok']
+    else:
+        auth_tok = {'access_token': '', 'refresh_token': ''}
+
+    print auth_tok
+    return render_template('index.html', username=session['username'])
 
 
 @app.route('/directory')
@@ -447,11 +486,12 @@ def sweet(data):
     """ A function to sweet the data that is inserted.
     Accepts a <list of dicts>. """
     for i in data:
+        print i
         if 'type' in i:
             del(i['_id'])
-            sweetmaker.sweet(conf.SWEET_STORE_ADD[0],
+            sweetmaker.sweet(conf.SWEET_STORE_ADD[0]+"?access_token="+session['auth_tok']['access_token'],
                              [{"what": i['type'],
-                               "who": i['author'],
+                               "who": session['username'],
                                "where":i['about'],
                                "how":{'blogUrl': '{0}/#{1}'.format(
                                    conf.CUSTOM_BLOG_URL[0],
@@ -548,6 +588,12 @@ def serve_domain_info():
                 otherlist[cntr] = str(i)
                 return jsonify(otherlist)
 
+
+@app.route('/saveSession', methods=['POST'])
+def saveSession():
+    g.url = request.form['url']
+    response = make_response()
+    return response
 
 import logging
 import os

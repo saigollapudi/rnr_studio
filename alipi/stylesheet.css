@@ -8,6 +8,7 @@
 
 #edit-current  { font-size:17px; font-weight:400; font-style:italic; text-align:justify; display:none; }
 #see-narration { font-size:17px; font-weight:400; font-style:italic; text-align:justify; display:none; }
+#login { font-size:17px; font-weight:400; font-style:italic; text-align:justify; }
 #see-links     { font-size:17px; font-weight:400; font-style:italic; text-align:justify; display:none; }
 #blog-filter   { right:-3px; min-width:225px; max-width:225px; font-size:17px; font-weight:400; font-style:italic;
 	       -moz-border-radius-bottomright:0px; -webkit-border-bottom-right-radius:0px; border-bottom-right-radius:0px;
@@ -113,6 +114,7 @@
 
 #edit-current  { font-size:14px; font-weight:200; font-style:italic; text-align:justify; display:none; }
 #see-narration { font-size:14px; font-weight:200; font-style:italic; text-align:justify; display:none; }
+#login { font-size:14px; font-weight:200; font-style:italic; text-align:justify; }
 #see-links     { font-size:14px; font-weight:200; font-style:italic; text-align:justify; display:none; }
 #blog-filter   { right:-3px; min-width:150px; max-width:150px; font-weight:200; font-style:italic; text-align:justify; display:none;
 		 -moz-border-radius-bottomright:0px; -webkit-border-bottom-right-radius:0px; border-bottom-right-radius:0px;
