@@ -428,7 +428,7 @@ window.onload = function() {
               $("#edit-current").button();
               $("#see-narration").button();
               $("#login").button();
-              if(document.cookie.contains("username")) {
+              if(document.cookie.match("username")) {
                 $("#login").hide();
               }
               $("#see-links").button();
