@@ -123,9 +123,17 @@ def start_page():
 
     response = make_response()
     response.data = lxml.html.tostring(g.root)
-    if 'username' in session:
-        response.set_cookie('username', session['username'])
+    # if 'username' in session:
+    #     response.set_cookie('username', session['username'])
     return response
+
+
+@app.route("/get/username", methods=["GET"])
+def getUsername():
+    if 'username' in session:
+        return jsonify({"username": session['username']})
+    else:
+        return jsonify({"status": "Not logged in"})
 
 
 def setScripts():
@@ -234,7 +242,6 @@ def redirect_uri():
         oauth_token_x_endpoint = conf.SWEETURL[0] + '/oauth/token'
         resp = requests.post(oauth_token_x_endpoint, data=payload)
         auth_tok = json.loads(resp.text)
-        print auth_tok
 
         if 'error' in auth_tok:
             print auth_tok['error']
@@ -604,4 +611,4 @@ fil.setLevel(logging.ERROR)
 app.logger.addHandler(fil)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='127.0.0.1')
+    app.run(debug=True, host=conf.MONGOHOST[0])

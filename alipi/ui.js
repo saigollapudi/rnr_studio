@@ -2,9 +2,7 @@
 //window.jQuery = window.jQuery || {};
 window.onload = function() {
   yepnope([{
-    test: parseFloat(window.jQuery.fn.jquery) <= 1.10 ,
-    nope:['//code.jquery.com/jquery-1.10.2.min.js'],
-    load:['//code.jquery.com/ui/1.10.3/jquery-ui.js'],
+    load:['//code.jquery.com/jquery-1.10.2.min.js','//code.jquery.com/ui/1.10.3/jquery-ui.js'],
     complete:function(){
       jQuery.noConflict();
       (function($) {
@@ -350,7 +348,6 @@ window.onload = function() {
             },
             loadOverlay: function()
             {
-              console.log(jQuery.fn.jquery);
         		  var overlay_template = '<div id="renarrated_overlay" class="alipi ui-widget-header ui-corner-all">'+
                 '<button id="outter-down-button" class="alipi" onclick="a11ypi.outterToggle();" up="true" title="Move this bar to top">Move</button> '+
 	              '<button id="outter-up-button" class="alipi" onclick="a11ypi.outterToggle();" title="Move this bar to bottom">Move</button> '+
@@ -428,9 +425,14 @@ window.onload = function() {
               $("#edit-current").button();
               $("#see-narration").button();
               $("#login").button();
-              if(document.cookie.match("username")) {
-                $("#login").hide();
-              }
+              // if(document.cookie.match("username")) {
+              //   $("#login").hide();
+              // }
+              $.getJSON("/get/username", function(data) {
+                if(data.username) {
+                  $("#login").hide();
+                }
+              });
               $("#see-links").button();
 
 //              $('input[class="alipi"], select[class="alipi"]').button();

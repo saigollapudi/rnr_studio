@@ -12,6 +12,7 @@ DBPASSWD = ('admin',)  # mySQL password
 DBUSRNAME = ('sql_password',)  # mySQL user with read access to the DBNAME
 DBHOST = ('localhost',)
 MONGODB = ('dev_alipi',)
+MONGOHOST = ('127.0.0.1')
 SWEETURL = ('http://localhost:5001',)
 SWEET_STORE_ADD = ("http://localhost:5001/api/sweets",)
 SECRET_KEY = ('a random secure string, see python UUID for more',)
