@@ -428,7 +428,7 @@ window.onload = function() {
               // if(document.cookie.match("username")) {
               //   $("#login").hide();
               // }
-              $.getJSON("/get/username", function(data) {
+              $.getJSON(config.deploy+"/get/username", function(data) {
                 if(data.username) {
                   $("#login").hide();
                 }
