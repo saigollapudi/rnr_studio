@@ -561,10 +561,11 @@ def menuForDialog():
 
         #send the response
         if (langForUrl):
-            connection.disconnect()
-            return json.dumps(langForUrl[0]['lang'])
+            response = make_response()
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            response.data = json.dumps(langForUrl[0]['lang'])
+            return response
         else:
-            connection.disconnect()
             return "empty"
 
 
