@@ -545,7 +545,11 @@ def menuForDialog():
                 c[cntr] = d
                 cntr += 1
         print c
-        return jsonify(c)
+        response = make_response()
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.data = jsonify(c)
+        return response
+
     else:
         collection = g.db['post']
         #get the ren languages for the received url
