@@ -16,6 +16,7 @@ import sweetmaker
 import oursql
 import requests
 from flask import jsonify
+from flask_cors import cross_origin
 import json
 
 
@@ -529,6 +530,7 @@ def askSweet():
 
 
 @app.route("/menu", methods=['GET'])
+@cross_origin(headers=['Content-Type'])
 def menuForDialog():
     if request.args.has_key('option') == False:
         collection = g.db['post']
@@ -545,10 +547,7 @@ def menuForDialog():
                 c[cntr] = d
                 cntr += 1
         print c
-        response = make_response()
-        response.headers['Access-Control-Allow-Origin'] = '*'
-        response.data = jsonify(c)
-        return response
+        return jsonify(c)
 
     else:
         collection = g.db['post']
