@@ -19,6 +19,8 @@ from flask import jsonify
 from flask_cors import cross_origin
 import json
 
+from urlnorm import urlnorm
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = conf.SECRET_KEY[0]
@@ -338,7 +340,8 @@ def serve_info():
 def replace():
     collection = g.db['post']
     lang = request.args['lang']
-    url = request.args['url']
+    url = urlnorm(request.args['url'])
+
     query = collection.group(
         key=Code('function(doc){' +
                  'return {"xpath": doc.xpath, "about": doc.url}}'),
@@ -461,6 +464,9 @@ def publish():
         data = json.loads(data)
     content = []
     for i in data:
+        # normalize URLs before inserting to DB
+        i['about'] = urlnorm(i['about'])
+
         # Create content objects here for posting to blog.  DELETEME.
         if 'comments' in i:
             page['comments'] = i['comments']
