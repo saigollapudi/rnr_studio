@@ -464,13 +464,14 @@ def publish():
         data = json.loads(data)
     content = []
     for i in data:
-        # normalize URLs before inserting to DB
-        i['about'] = urlnorm(i['about'])
+        print i
 
         # Create content objects here for posting to blog.  DELETEME.
         if 'comments' in i:
             page['comments'] = i['comments']
         else:
+            # normalize URLs before inserting to DB
+            i['about'] = urlnorm(i['about'])
             contentobj = {}
             contentobj['type'] = i['elementtype']
             contentobj['attr'] = {"language": i['lang'],
@@ -538,14 +539,14 @@ def askSweet():
 @app.route("/menu", methods=['GET'])
 @cross_origin(headers=['Content-Type'])
 def menuForDialog():
-    if request.args.has_key('option') == False:
+    if 'option' not in request.args:
         collection = g.db['post']
         c = {}
         cntr = 0
-        print request.args['url']
+        url = urlnorm(request.args.get('url'))
         for i in collection.find({"about":
-                                  request.args['url']}).distinct('lang'):
-            for j in collection.find({"about": request.args['url'],
+                                  url}).distinct('lang'):
+            for j in collection.find({"about": url,
                                       'lang': i}).distinct('type'):
                 d = {}
                 d['lang'] = i
@@ -581,7 +582,7 @@ def menuForDialog():
 @app.route("/domain")
 def serve_domain_info():
     collection = g.db['post']
-    url = request.args['url']
+    url = urlnorm(request.args.get('url'))
     #all re-narrations of the same xpath are grouped
     query = collection.group(
         key=None,
