@@ -158,7 +158,7 @@ window.onload = function() {
 		          if(a['type'])
 			          type = a['type'];
 		          else
-			          type = 're-narration'
+			          type = 're-narration';
 		          var lang = '';
 
 		          if( type != 're-narration')
@@ -358,7 +358,7 @@ window.onload = function() {
 	              // '5el</button>'+
                 '<button id="see-links" class="alipi"  title="See other re-narrated pages of this domain">Re-narrated Pages '+
 	                  '</button>'+
-                    '<button id="login" class="alipi" onclick="a11ypi.login();" title="Login to SWeeT store">Login</button>'+
+                    '<button id="alipi-login" class="alipi" onclick="a11ypi.login();" title="Login to SWeeT store">Login</button>'+
                 // '<select id="blog-filter" class="alipi" onChange="a11ypi.checkSelect();" title="Select one of the blog name"></select>'+
                 '<button id="go" class="alipi ui-icon-circle-arrow-e" onclick="a11ypi.go();" title="Filter by blog" >|Y|</button>'+
                 '<div id="show-box" title="Choose a narration"></div> '+
@@ -424,13 +424,11 @@ window.onload = function() {
 
               $("#edit-current").button();
               $("#see-narration").button();
-              $("#login").button();
-              // if(document.cookie.match("username")) {
-              //   $("#login").hide();
-              // }
+              $("#alipi-login").button();
               $.getJSON(config.deploy+"/get/username", function(data) {
                 if(data.username) {
-                  $("#login").hide();
+                  a11ypi.username = data.username;
+                  $("#alipi-login").hide();
                 }
               });
               $("#see-links").button();
