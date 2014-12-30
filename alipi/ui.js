@@ -206,7 +206,7 @@ window.onload = function() {
 							          height = a['data'].split(',')[0].split('x')[1];
 							          result.setAttribute('width',width);
 							          result.setAttribute('height', height);
-							          result.setAttribute('class','blink');
+							          // result.setAttribute('class','blink');
 						          }
 						          else
 							          $(result).hide();
@@ -216,11 +216,11 @@ window.onload = function() {
 						          a['data'] = decodeURIComponent(a['data']);
 						          audio = '<audio controls="controls" src="'+a['data']+'" style="display:table;"></audio>';
 						          $(result).before(audio);
-						          result.setAttribute('class','blink');
+						          // result.setAttribute('class','blink');
 					          }
                     else{
 						          result.innerHTML = a['data'];
-						          result.setAttribute('class','blink');
+						          // result.setAttribute('class','blink');
                     }
                     result=nodes.iterateNext();
 				          }
