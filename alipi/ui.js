@@ -1597,23 +1597,19 @@ window.onload = function() {
 								         window.location.reload();
 								       });
 
-						    //+'&title='+encodeURIComponent(document.title)
-                //				}).done(function(){
-				        //	console.log("test");
-				        //window.location.reload();
-                //				});
 	            }
 		        }
           },
 
           buildDataString : function (){
 		        var check_xpath = [], temp_history = [], index = [];
-		        for(x=0; x<util.history.length; x++) {
+		        for(var x=0; x<util.history.length; x++) {
 	            check_xpath.push(util.history[x].xpath);
 		        }
-		        for(i=0; i<check_xpath.length-1; i++) {
-	            for(j=i+1; j<check_xpath.length; j++) {
-				        if ((check_xpath[i] == check_xpath[j]) && (util.history[i].elementType == util.history[j].elementType)) {
+		        for(var i=0; i<check_xpath.length-1; i++) {
+	            for(var j=i+1; j<check_xpath.length; j++) {
+				        if ((check_xpath[i] == check_xpath[j]) &&
+                    (util.history[i].elementType == util.history[j].elementType)) {
 					        index.push(i);
 				        }
 	            }
@@ -1624,7 +1620,7 @@ window.onload = function() {
 	            }
 		        }
 
-		        for (var x=0; x<util.history.length; x++) {
+		        for (x=0; x<util.history.length; x++) {
 	            if (util.history[x] != undefined) {
 				        temp_history.push(util.history[x]);
 	            }
@@ -1646,43 +1642,13 @@ window.onload = function() {
 			        dict["elementtype"] = command.elementType;
 			        dict["xpath"] = command.xpath;
 			        dict["data"] = command.data;
-			        /*if ($('#auth-select').val() == '' || $('#auth-select').val() == /\S/) {
-				       dict["author"] = "Anonymous";
-			         } else {
-				       dict["author"] = $('#auth-select').val();
-			         }*/
-              dict['author'] = $('#tar-uname').val() || $('#tar-name').val() || 'Anonymous';
+              dict['author'] = a11ypi.username || 'Anonymous';
 			        buff.push(dict);
 
-			        // buffer.append('###'); //separates the commands
-	            // buffer.append('about=');  //url=about    //removed '&' on purpose
-	            // buffer.append(window.location.search.split('=')[1]);
-	            // buffer.append('&lang=');//lang
-	            // buffer.append(encodeURIComponent($('#lang-select').val()));
-	            // buffer.append('&location=');//location
-	            // buffer.append(encodeURIComponent($('#loc-select').val()));
-	            // buffer.append('&style=');//style
-	            // buffer.append(encodeURIComponent($('#style-select').val()));
-	            // buffer.append('&blog=');  //blog where to post
-	            // buffer.append(encodeURIComponent("blog"));
-	            // buffer.append('&elementtype='); // text, audio, img
-	            // buffer.append(encodeURIComponent(command.elementType));
-	            // buffer.append('&xpath=');//xpath
-	            // buffer.append(encodeURIComponent(command.xpath));
-	            // buffer.append('&data=');  //data
-	            // buffer.append(encodeURIComponent(command.data));
-	            // buffer.append('&author='); //author
-	            // if ($('#auth-select').val() == '' || $('#auth-select').val() == /\S/) {
-			        // 	buffer.append(encodeURIComponent('Anonymous'));
-	            // } else {
-			        // 	buffer.append(encodeURIComponent($('#auth-select').val()));
-	            // }
 		        });
-		        // return buffer.toString().substring(3);
             buff.push({'comments': $("#tar-comment").val()});
-            console.log(buff);
 		        return buff;
-          },
+          }
         };
 
         var manager = {
@@ -1733,10 +1699,14 @@ window.onload = function() {
 	            elementType : 'image',
 	            xpath : DOM.getXpath(selectedElement),
 	            url : window.location.href,
-	            data : new StringUtil.StringBuffer().append(selectedElement.width).append('x').append(selectedElement.height).append(',').append(url).toString(),
+	            data : new StringUtil.StringBuffer().append(
+                selectedElement.width).append('x').append(
+                  selectedElement.height).append(',').append(
+                    url).toString(),
 	            previousData : {
 				        'src' : selectedElement.src,
-				        'size' : { width: selectedElement.width, height: selectedElement.height }
+				        'size' : { width: selectedElement.width,
+                           height: selectedElement.height }
 	            }
 		        };
 		        util.makeChanges(command, selectedElement);
@@ -1752,11 +1722,12 @@ window.onload = function() {
 	            data : '',
 	            previousData : {
 				        'src' : selectedElement.src,
-				        'size' : { width: selectedElement.width, height: selectedElement.height }
+				        'size' : { width: selectedElement.width,
+                           height: selectedElement.height }
 	            }
 		        };
 		        util.makeChanges(command, selectedElement);
-          },
+          }
 
         };
         //Implementing the class for doing StringBuffer.

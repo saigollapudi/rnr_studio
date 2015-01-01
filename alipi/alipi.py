@@ -337,46 +337,15 @@ def serve_info():
 
 
 @app.route("/replace", methods=['GET'])
+@cross_origin(headers=['Content-Type'])
 def replace():
-    collection = g.db['post']
+    # collection = g.db['post']
     lang = request.args['lang']
     url = urlnorm(request.args['url'])
-
-    query = collection.group(
-        key=Code('function(doc){' +
-                 'return {"xpath": doc.xpath, "about": doc.url}}'),
-        condition={"about": url, "lang": lang, "elementtype": "text"},
-        initial={'narration': []},
-        reduce=Code('function(doc,out){out.narration.push(doc);}')
-        )
-
-    print query
-
-    audio_query = collection.group(
-        key=Code('function(doc){' +
-                 'return {"xpath": doc.xpath, "about": doc.url}}'),
-        condition={"about": url, "lang": lang, 'elementtype': "audio/ogg"},
-        initial={'narration': []},
-        reduce=Code('function(doc,out){out.narration.push(doc);}')
-        )
-
-    image_query = collection.group(
-        key=Code('function(doc){' +
-                 'return {"xpath": doc.xpath, "about": doc.url}}'),
-        condition={"about": url, "lang": lang, 'elementtype': "image"},
-        initial={'narration': []},
-        reduce=Code('function(doc,out){out.narration.push(doc);}')
-        )
-    try:
-        for i in audio_query:
-            query.append(i)
-    except IndexError:
-        pass
-    try:
-        for i in image_query:
-            query.append(i)
-    except IndexError:
-        pass
+    if 'author' in request.args:
+        query = query_by_params(lang, url, request.args.get('author'))
+    else:
+        query = query_by_params(lang, url)
 
     for i in query:
         for y in i['narration']:
@@ -384,8 +353,29 @@ def replace():
     d = {}
     d['r'] = query
     response = jsonify(d)
-    response.headers['Access-Control-Allow-Origin'] = '*'
+    # response.headers['Access-Control-Allow-Origin'] = '*'
     return response
+
+
+def query_by_params(language, url, author=None):
+    collection = g.db['post']
+    if author is None:
+        query = collection.group(
+            key=Code('function(doc){' +
+                     'return {"xpath": doc.xpath, "about": doc.url}}'),
+            condition={"about": url, "lang": language},
+            initial={'narration': []},
+            reduce=Code('function(doc,out){out.narration.push(doc);}')
+        )
+    else:
+        query = collection.group(
+            key=Code('function(doc){' +
+                     'return {"xpath": doc.xpath, "about": doc.url}}'),
+            condition={"about": url, "lang": language, "author": author},
+            initial={'narration': []},
+            reduce=Code('function(doc,out){out.narration.push(doc);}')
+        )
+    return query
 
 
 @app.route('/feeds', methods=['GET'])
@@ -394,6 +384,7 @@ def serve_feed_temp():
 
 
 @app.route('/feed', methods=['GET'])
+@cross_origin(headers=['Content-Type'])
 def serve_feed():
     coll = g.db['post']
     d = {}
@@ -404,11 +395,11 @@ def serve_feed():
             d[cntr] = i
             cntr += 1
     response = jsonify(d)
-    response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 
 
 @app.route('/about', methods=['GET'])
+@cross_origin(headers=['Content-Type'])
 def serve_authors():
     coll = g.db['post']
     d = {}
@@ -418,12 +409,12 @@ def serve_authors():
         d[cntr] = i
         cntr += 1
     response = jsonify(d)
-    response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 
 
 #Retrieve all information about a specific $about and a given $author.
 @app.route('/author', methods=['GET'])
+@cross_origin(headers=['Content-Type'])
 def serve_author():
     coll = g.db['post']
     d = {}
@@ -434,7 +425,6 @@ def serve_author():
         d[cntr] = i
         cntr += 1
     response = jsonify(d)
-    response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 
 
@@ -504,16 +494,18 @@ def sweet(data):
         print i
         if 'type' in i:
             del(i['_id'])
-            sweetmaker.sweet(conf.SWEET_STORE_ADD[0]+"?access_token="+session['auth_tok']['access_token'],
+            sweetmaker.sweet(conf.SWEET_STORE_ADD[0] +
+                             "?access_token=" + session['auth_tok']
+                             ['access_token'],
                              [{"what": i['type'],
                                "who": session['username'],
                                "where":i['about'],
                                "how":{'blogUrl': '{0}/#{1}'.format(
                                    conf.CUSTOM_BLOG_URL[0],
                                    g.response_from_blogger.json()['name']),
-                                'language': i['lang'],
-                                'location': i['location'],
-                                'xpath': i['xpath']}}])
+                                    'language': i['lang'],
+                                    'location': i['location'],
+                                    'xpath': i['xpath']}}])
     return True
         # data = json.dumps(data)
     # req = requests.api.post(conf.SWEETURL[0]+"/add",{'data':data})
