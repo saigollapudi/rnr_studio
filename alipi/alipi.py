@@ -1,28 +1,21 @@
-from flask import Flask
-from flask import request
-from flask import render_template
-from flask import make_response
-from flask import session
+from flask import (Flask, request, render_template, make_response,
+                   session, jsonify, g, url_for, send_from_directory)
+from bson import Code
+from urllib import unquote_plus, quote_plus
+from flask_cors import cross_origin
+from urlnorm import urlnorm
 import lxml.html
 import pymongo
-from bson import Code
 import urllib2
 import StringIO
-from flask import g
-from urllib import quote_plus
-from urllib import unquote_plus
 import conf
 import sweetmaker
 import oursql
-import requests
-from flask import jsonify
-from flask_cors import cross_origin
 import json
-
-from urlnorm import urlnorm
 
 
 app = Flask(__name__)
+import requests
 app.config['SECRET_KEY'] = conf.SECRET_KEY[0]
 
 
@@ -339,13 +332,12 @@ def serve_info():
 @app.route("/replace", methods=['GET'])
 @cross_origin(headers=['Content-Type'])
 def replace():
-    # collection = g.db['post']
     lang = request.args['lang']
     url = urlnorm(request.args['url'])
     if 'author' in request.args:
-        query = query_by_params(lang, url, request.args.get('author'))
+        query = query_by_params(url, lang, request.args.get('author'))
     else:
-        query = query_by_params(lang, url)
+        query = query_by_params(url, lang)
 
     for i in query:
         for y in i['narration']:
@@ -353,11 +345,10 @@ def replace():
     d = {}
     d['r'] = query
     response = jsonify(d)
-    # response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 
 
-def query_by_params(language, url, author=None):
+def query_by_params(url, language, author=None):
     collection = g.db['post']
     if author is None:
         query = collection.group(
@@ -604,6 +595,10 @@ def saveSession():
     g.url = request.form['url']
     response = make_response()
     return response
+
+@app.route('/robots.txt')
+def robots():
+    return send_from_directory(app.static_folder, request.path[1:])
 
 import logging
 import os
