@@ -1,6 +1,5 @@
 from flask import (Flask, request, render_template, make_response,
                    session, jsonify, g, url_for, send_from_directory, redirect)
-from flask_wtf import Form, RecaptchaField
 from bson import Code
 from urllib import unquote_plus, quote_plus
 from flask_cors import cross_origin
