@@ -1,5 +1,6 @@
 from flask import (Flask, request, render_template, make_response,
-                   session, jsonify, g, url_for, send_from_directory)
+                   session, jsonify, g, url_for, send_from_directory, redirect)
+from flask_wtf import Form, RecaptchaField
 from bson import Code
 from urllib import unquote_plus, quote_plus
 from flask_cors import cross_origin
@@ -33,95 +34,111 @@ def close(exception):
 
 @app.route('/')
 def start_page():
-    d = {}
-    d['foruri'] = request.args['foruri']
-    myhandler1 = urllib2.Request(d['foruri'],
-                                 headers={'User-Agent':
-                                          "Mozilla/5.0 (X11; " +
-                                          "Linux x86_64; rv:25.0)" +
-                                          "Gecko/20100101 Firefox/25.0)"})
+    if 'verified' in request.cookies and request.cookies['verified'] == 'True':
+        d = {}
+        d['foruri'] = request.args['foruri']
+        myhandler1 = urllib2.Request(d['foruri'],
+                                     headers={'User-Agent':
+                                              "Mozilla/5.0 (X11; " +
+                                              "Linux x86_64; rv:25.0)" +
+                                              "Gecko/20100101 Firefox/25.0)"})
     # A fix to send user-agents, so that sites render properly.
-    try:
-        a = urllib2.urlopen(myhandler1)
-        if a.geturl() != d['foruri']:
-            return ("There was a server redirect, please click on the" +
-                    " <a href='http://y.a11y.in/web?foruri={0}'>link</a> to" +
-                    " continue.".format(quote_plus(a.geturl())))
-        else:
-            page = a.read()
-            a.close()
-    except ValueError:
-        return ("The link is malformed, click " +
-                "<a href='http://y.a11y.in/web?foruri={0}&lang={1}" +
-                "&interactive=1'>" +
-                "here</a> to be redirected.".format(
-                    quote_plus(unquote_plus(d['foruri'].encode('utf-8'))),
-                    request.args['lang']))
-    except urllib2.URLError:
-        return render_template('error.html')
-    try:
-        page = unicode(page, 'utf-8')  # Hack to fix improperly displayed chars on wikipedia.
-    except UnicodeDecodeError:
-        pass  # Some pages may not need be utf-8'ed
-    try:
-        g.root = lxml.html.parse(StringIO.StringIO(page)).getroot()
-    except ValueError:
-        g.root = lxml.html.parse(d['foruri']).getroot()  # Sometimes creators of the page lie about the encoding, thus leading to this execption. http://lxml.de/parsing.html#python-unicode-strings
-    if request.args.has_key('lang') == False and request.args.has_key('blog') == False:
-        g.root.make_links_absolute(d['foruri'],
-                                   resolve_base_href=True)
-        for i in g.root.iterlinks():
-            if i[1] == 'href' and i[0].tag != 'link':
-                try:
-                    i[0].attrib['href'] = 'http://{0}?foruri={1}'.format(
-                        conf.DEPLOYURL[0], quote_plus(i[0].attrib['href']))
-                except KeyError:
-                    i[0].attrib['href'] = '{0}?foruri={1}'.format(
-                        conf.DEPLOYURL[0], quote_plus(
-                            i[0].attrib['href'].encode('utf-8')))
-        setScripts()
-        g.root.body.set("onload", "a11ypi.loadOverlay();")
+        try:
+            a = urllib2.urlopen(myhandler1)
+            if a.geturl() != d['foruri']:
+                return ("There was a server redirect, please click on the" +
+                        " <a href='http://y.a11y.in/web?foruri={0}'>link</a> to" +
+                        " continue.".format(quote_plus(a.geturl())))
+            else:
+                page = a.read()
+                a.close()
+        except ValueError:
+            return ("The link is malformed, click " +
+                    "<a href='http://y.a11y.in/web?foruri={0}&lang={1}" +
+                    "&interactive=1'>" +
+                    "here</a> to be redirected.".format(
+                        quote_plus(unquote_plus(d['foruri'].encode('utf-8'))),
+                        request.args['lang']))
+        except urllib2.URLError:
+            return render_template('error.html')
+        try:
+            page = unicode(page, 'utf-8')  # Hack to fix improperly displayed chars on wikipedia.
+        except UnicodeDecodeError:
+            pass  # Some pages may not need be utf-8'ed
+        try:
+            g.root = lxml.html.parse(StringIO.StringIO(page)).getroot()
+        except ValueError:
+            g.root = lxml.html.parse(d['foruri']).getroot()  # Sometimes creators of the page lie about the encoding, thus leading to this execption. http://lxml.de/parsing.html#python-unicode-strings
+        if request.args.has_key('lang') == False and request.args.has_key('blog') == False:
+            g.root.make_links_absolute(d['foruri'],
+                                       resolve_base_href=True)
+            for i in g.root.iterlinks():
+                if i[1] == 'href' and i[0].tag != 'link':
+                    try:
+                        i[0].attrib['href'] = 'http://{0}?foruri={1}'.format(
+                            conf.DEPLOYURL[0], quote_plus(i[0].attrib['href']))
+                    except KeyError:
+                        i[0].attrib['href'] = '{0}?foruri={1}'.format(
+                            conf.DEPLOYURL[0], quote_plus(
+                                i[0].attrib['href'].encode('utf-8')))
+            setScripts()
+            g.root.body.set("onload", "a11ypi.loadOverlay();")
 
 
-    elif request.args.has_key('lang') == True and request.args.has_key('interactive') == True and request.args.has_key('blog') == False:
-        setScripts()
-        setSocialScript()
-        g.root.body.set("onload", "a11ypi.ren();a11ypi.tweet(); " +
-                        "a11ypi.facebook(); a11ypi.loadOverlay();")
-        g.root.make_links_absolute(d['foruri'], resolve_base_href=True)
+        elif request.args.has_key('lang') == True and request.args.has_key('interactive') == True and request.args.has_key('blog') == False:
+            setScripts()
+            setSocialScript()
+            g.root.body.set("onload", "a11ypi.ren();a11ypi.tweet(); " +
+                            "a11ypi.facebook(); a11ypi.loadOverlay();")
+            g.root.make_links_absolute(d['foruri'], resolve_base_href=True)
+            response = make_response()
+            response.data = lxml.html.tostring(g.root)
+            return response
+
+        elif request.args.has_key('lang') == True and request.args.has_key('blog') == False:
+            script_jq_mini = g.root.makeelement('script')
+            g.root.body.append(script_jq_mini)
+            script_jq_mini.set("src", conf.JQUERYURL[0] + "/jquery.min.js")
+            script_jq_mini.set("type", "text/javascript")
+            d['lang'] = request.args['lang']
+            script_test = g.root.makeelement('script')
+            g.root.body.append(script_test)
+            script_test.set("src", conf.APPURL[0] + "/alipi/ui.js")
+            script_test.set("type", "text/javascript")
+            g.root.body.set("onload", "a11ypi.ren()")
+
+        elif request.args.has_key('interactive') == True and request.args.has_key('blog') == True and request.args.has_key('lang') == True:
+            setScripts()
+            setSocialScript()
+            g.root.body.set("onload", "a11ypi.filter(); a11ypi.tweet();" +
+                            "a11ypi.facebook(); a11ypi.loadOverlay();")
+            g.root.make_links_absolute(d['foruri'], resolve_base_href=True)
+
+        elif request.args.has_key('interactive') == False and request.args.has_key('blog') == True:
+            setScripts()
+            g.root.make_links_absolute(d['foruri'], resolve_base_href=True)
+            g.root.body.set('onload', 'a11ypi.loadOverlay();')
+
         response = make_response()
         response.data = lxml.html.tostring(g.root)
         return response
+    else:
+        session['foruri'] = request.args.get('foruri')
+        return redirect(url_for('verify'))
 
-    elif request.args.has_key('lang') == True and request.args.has_key('blog') == False:
-        script_jq_mini = g.root.makeelement('script')
-        g.root.body.append(script_jq_mini)
-        script_jq_mini.set("src", conf.JQUERYURL[0] + "/jquery.min.js")
-        script_jq_mini.set("type", "text/javascript")
-        d['lang'] = request.args['lang']
-        script_test = g.root.makeelement('script')
-        g.root.body.append(script_test)
-        script_test.set("src", conf.APPURL[0] + "/alipi/ui.js")
-        script_test.set("type", "text/javascript")
-        g.root.body.set("onload", "a11ypi.ren()")
-
-    elif request.args.has_key('interactive') == True and request.args.has_key('blog') == True and request.args.has_key('lang') == True:
-        setScripts()
-        setSocialScript()
-        g.root.body.set("onload", "a11ypi.filter(); a11ypi.tweet();" +
-                        "a11ypi.facebook(); a11ypi.loadOverlay();")
-        g.root.make_links_absolute(d['foruri'], resolve_base_href=True)
-
-    elif request.args.has_key('interactive') == False and request.args.has_key('blog') == True:
-        setScripts()
-        g.root.make_links_absolute(d['foruri'], resolve_base_href=True)
-        g.root.body.set('onload', 'a11ypi.loadOverlay();')
-
-    response = make_response()
-    response.data = lxml.html.tostring(g.root)
-    # if 'username' in session:
-    #     response.set_cookie('username', session['username'])
-    return response
+@app.route("/verify", methods=["GET", "POST"])
+def verify():
+    if request.method == "GET":
+        return render_template('verify.html')
+    else:
+        captcha_string = request.form.get('g-recaptcha-response')
+        gVerify = requests.get(conf.RECAPTCHA_URL + "?secret=" + conf.RECAPTCHA_SECRET + "&response=" + captcha_string)
+        if gVerify.json()['success'] is True:
+            response = make_response(redirect(url_for('start_page', foruri=session.get('foruri'))))
+            response.set_cookie('verified', 'True', 1800)
+            return response
+        else:
+            return redirect(url_for('verify'))
 
 
 @app.route("/get/username", methods=["GET"])

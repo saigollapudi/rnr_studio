@@ -21,3 +21,5 @@ CUSTOM_BLOG_URL = ('http://localhost:5002',)
 APP_ID = 'your app id from sweet store'
 APP_SECRET = 'your app secret from sweet store'
 REDIRECT_URI = "http://localhost:5000/redirect"
+RECAPTCHA_URL = "https://www.google.com/recaptcha/api/siteverify"
+RECAPTCHA_SECRET = "secret provided by reCAPTCHA service provider"
