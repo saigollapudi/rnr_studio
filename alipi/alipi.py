@@ -345,6 +345,35 @@ def serve_info():
     return response
 
 
+@app.route('/find')
+def find_renarrartion():
+    """Experimental API to query for re-narrations.
+    The API accepts following params:
+    url - url of the page for which re-narrations are needed
+    language - language of re-narration
+    author (optional) - author(s) of the re-narration"""
+
+    lang = request.args['lang']
+    url = urlnorm(request.args['url'])
+    collection = g.db['post']
+    if 'author' in request.args:
+        authors = request.args.getlist('author')
+        query = collection.find({'about': url,
+                             'lang': lang,
+                             'author': {'$in': authors}})
+    else:
+        query = collection.find({'about': url,
+                             'lang': lang})
+    d = {}
+    cntr = 0
+    for i in query:
+        i['_id'] = str(i['_id'])
+        d[cntr] = i
+        cntr += 1
+    response = jsonify(d)
+    return response
+
+
 @app.route("/replace", methods=['GET'])
 @cross_origin(headers=['Content-Type'])
 def replace():
