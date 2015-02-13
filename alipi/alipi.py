@@ -359,11 +359,11 @@ def find_renarrartion():
     if 'author' in request.args:
         authors = request.args.getlist('author')
         query = collection.find({'about': url,
-                             'lang': lang,
-                             'author': {'$in': authors}})
+                                 'lang': lang,
+                                 'author': {'$in': authors}})
     else:
         query = collection.find({'about': url,
-                             'lang': lang})
+                                 'lang': lang})
     d = {}
     cntr = 0
     for i in query:
