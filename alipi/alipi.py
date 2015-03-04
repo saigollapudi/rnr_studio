@@ -122,7 +122,7 @@ def start_page():
         response.data = lxml.html.tostring(g.root)
         return response
     else:
-        session['foruri'] = request.args.get('foruri')
+        session['params'] = request.args.items()
         return redirect(url_for('verify'))
 
 @app.route("/verify", methods=["GET", "POST"])
@@ -133,7 +133,7 @@ def verify():
         captcha_string = request.form.get('g-recaptcha-response')
         gVerify = requests.get(conf.RECAPTCHA_URL + "?secret=" + conf.RECAPTCHA_SECRET + "&response=" + captcha_string)
         if gVerify.json()['success'] is True:
-            response = make_response(redirect(url_for('start_page', foruri=session.get('foruri'))))
+            response = make_response(redirect(url_for('start_page', session.get('params'))))
             response.set_cookie('verified', 'True', 1800)
             return response
         else:
