@@ -13,6 +13,17 @@ import sweetmaker
 import oursql
 import json
 
+##############################################
+###
+###     with SaiGo modifications 
+###
+##############################################
+
+# a console logging tool being setup for use during debugging 
+import logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.debug('+++++++++++++++++++++++ Starting log message ++++++++++++++.') 
+# henceforth we can use logging.debug() to print msgs to screen
 
 app = Flask(__name__)
 import requests
@@ -21,19 +32,23 @@ app.config['SECRET_KEY'] = conf.SECRET_KEY[0]
 
 @app.before_request
 def first():
-    g.connection = pymongo.MongoClient('localhost', 27017)  # Create the
-    # object once and use it.
-    g.db = g.connection[conf.MONGODB[0]]
+    logging.debug('in before_request')
+    # Create the object once and use it.
+    #    g.connection = pymongo.MongoClient('localhost', 27017)  
+    #    g.db = g.connection[conf.MONGODB[0]]
 
 
 @app.teardown_request
 def close(exception):
-    g.connection.disconnect()
+    logging.debug('in teardown_request')
+    #    g.connection.disconnect()
 
 
 @app.route('/')
 def start_page():
-    if 'verified' in request.cookies and request.cookies['verified'] == 'True':
+    # SaiGo; temp suspending verification for debugging
+    #if 'verified' in request.cookies and request.cookies['verified'] == 'True':
+        logging.debug('in / view')
         d = {}
         d['foruri'] = request.args['foruri']
         myhandler1 = urllib2.Request(d['foruri'],
@@ -41,7 +56,7 @@ def start_page():
                                               "Mozilla/5.0 (X11; " +
                                               "Linux x86_64; rv:25.0)" +
                                               "Gecko/20100101 Firefox/25.0)"})
-    # A fix to send user-agents, so that sites render properly.
+        # A fix to send user-agents, so that sites render properly.
         try:
             a = urllib2.urlopen(myhandler1)
             if a.geturl() != d['foruri']:
@@ -121,25 +136,32 @@ def start_page():
         response = make_response()
         response.data = lxml.html.tostring(g.root)
         return response
-    else:
-        session['params'] = request.args.to_dict()
-        return redirect(url_for('verify'))
+# SaiGo; temp suppressing the verification part        
+#    else:
+#        session['params'] = request.args.to_dict()
+#        return redirect(url_for('verify'))
 
 @app.route("/verify", methods=["GET", "POST"])
 def verify():
-    if request.method == "GET":
-        return render_template('verify.html')
-    else:
-        captcha_string = request.form.get('g-recaptcha-response')
-        gVerify = requests.get(conf.RECAPTCHA_URL + "?secret=" + conf.RECAPTCHA_SECRET + "&response=" + captcha_string)
-        if gVerify.json()['success'] is True:
-            print session.get('params')
-            response = make_response(redirect(url_for('start_page', **session.get('params'))))
-
-            response.set_cookie('verified', 'True', 1800)
-            return response
-        else:
-            return redirect(url_for('verify'))
+    # temp code added by SaiGo. This is for testing purposes. suppressing verificaiton
+    logging.debug('in /verify')
+    response = make_response(redirect(url_for('start_page', **session.get('params'))))
+    response.set_cookie('verified', 'True', 1800)
+    return response
+#    original code below. Temporarily suppressing verification for debugging purposes    
+#    if request.method == "GET":
+#        return render_template('verify.html')
+#    else:
+#        captcha_string = request.form.get('g-recaptcha-response')
+#        gVerify = requests.get(conf.RECAPTCHA_URL + "?secret=" + conf.RECAPTCHA_SECRET + "&response=" + captcha_string)
+#        if gVerify.json()['success'] is True:
+#            print session.get('params')
+#            response = make_response(redirect(url_for('start_page', **session.get('params'))))
+#
+#            response.set_cookie('verified', 'True', 1800)
+#            return response
+#        else:
+#            return redirect(url_for('verify'))
 
 
 @app.route("/get/username", methods=["GET"])
@@ -656,4 +678,6 @@ fil.setLevel(logging.ERROR)
 app.logger.addHandler(fil)
 
 if __name__ == '__main__':
-    app.run(debug=True, host=conf.MONGOHOST[0])
+    # temporarily suppressing MongoDB by SaiGo for verificaiton purposes only
+    # app.run(debug=True, host=conf.MONGOHOST[0])
+    app.run(debug=True) #, host=conf.MONGOHOST[0])
